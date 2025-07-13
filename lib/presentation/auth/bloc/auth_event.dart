@@ -24,4 +24,3 @@ class AuthProfileCompleted extends AuthEvent {
     required this.tanggalLahir,
   });
 }
-

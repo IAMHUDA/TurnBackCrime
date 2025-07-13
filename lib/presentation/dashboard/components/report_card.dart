@@ -6,6 +6,8 @@ class ReportCard extends StatelessWidget {
   final String time;
   final String description;
   final int totalKomentar;
+  final VoidCallback? onKomentarTap;
+  final VoidCallback? onRefreshTap;
 
   const ReportCard({
     super.key,
@@ -14,13 +16,15 @@ class ReportCard extends StatelessWidget {
     required this.time,
     required this.description,
     required this.totalKomentar,
+    this.onKomentarTap,
+    this.onRefreshTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
-      margin: EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -29,13 +33,14 @@ class ReportCard extends StatelessWidget {
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title dan Lokasi
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -51,16 +56,23 @@ class ReportCard extends StatelessWidget {
                         color: Colors.grey[800],
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
-                        SizedBox(width: 4),
-                        Text(
-                          location,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                        Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -70,37 +82,40 @@ class ReportCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12),
+
+          const SizedBox(height: 12),
+
+          // Deskripsi
           Text(
             description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
           ),
-          SizedBox(height: 12),
+
+          const SizedBox(height: 12),
+
+          // Waktu dan komentar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 time,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
-              Row(
-                children: [
-                  Icon(Icons.comment, size: 16, color: Colors.grey[500]),
-                  SizedBox(width: 4),
-                  Text(
-                    '$totalKomentar',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
+              GestureDetector(
+                onTap: () {
+                  onKomentarTap?.call(); // buka/tutup komentar
+                  onRefreshTap?.call(); // refresh komentar
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.comment, size: 16, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$totalKomentar',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

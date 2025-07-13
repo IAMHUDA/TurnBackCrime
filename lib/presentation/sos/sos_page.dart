@@ -1,77 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/sos_bloc.dart';
 
 class SOSPage extends StatelessWidget {
-  const SOSPage({super.key});
+  final int idPengguna;
+  final String nama;
+  final String emailTujuan;
+
+  const SOSPage({
+    super.key,
+    required this.idPengguna,
+    required this.nama,
+    required this.emailTujuan,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-              color: Colors.red[700],
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.red.withOpacity(0.3),
-                  spreadRadius: 5,
-                  blurRadius: 15,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Icon(Icons.sos, size: 60, color: Colors.white),
-          ),
-          SizedBox(height: 30),
-          Text(
-            'Emergency SOS',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.red[800],
-            ),
-          ),
-          SizedBox(height: 15),
-          Text(
-            'Tekan tombol SOS untuk panggilan darurat',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('SOS Activated! Menghubungi layanan darurat...'),
-                  backgroundColor: Colors.red[700],
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[700],
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+    return BlocConsumer<SOSBloc, SOSState>(
+      listener: (context, state) {
+        if (state is SOSBerhasil) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('SOS berhasil dikirim via email')),
+          );
+        } else if (state is SOSGagal) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.warning, color: Colors.red, size: 100),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  context.read<SOSBloc>().add(
+                        AktifkanSOS(
+                          idPengguna: idPengguna,
+                          nama: nama,
+                          emailTujuan: emailTujuan,
+                        ),
+                      );
+                },
+                child: state is SOSLoading
+                    ? CircularProgressIndicator()
+                    : Text("KIRIM SOS"),
               ),
-            ),
-            child: Text(
-              'AKTIVASI SOS',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

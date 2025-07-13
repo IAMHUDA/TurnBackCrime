@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../data/model/user_model.dart';
 
 abstract class AuthState extends Equatable {
   @override
@@ -10,23 +11,21 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final String nama;
-  final String email;
+  final UserModel user;
 
-  AuthAuthenticated({required this.nama, required this.email});
+  AuthAuthenticated({required this.user});
 
   @override
-  List<Object?> get props => [nama, email];
+  List<Object?> get props => [user];
 }
 
 class AuthAdmin extends AuthState {
-  final String nama;
-  final String email;
+  final UserModel user;
 
-  AuthAdmin({required this.nama, required this.email});
+  AuthAdmin({required this.user});
 
   @override
-  List<Object?> get props => [nama, email];
+  List<Object?> get props => [user];
 }
 
 class AuthNeedsCompletion extends AuthState {}

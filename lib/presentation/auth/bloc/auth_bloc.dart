@@ -5,12 +5,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../services/service_http_client.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import '../../../data/model/user_model.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ServiceHttpClient httpClient;
 
   AuthBloc(this.httpClient) : super(AuthInitial()) {
-    // Login Handler
     on<AuthLoginRequested>((event, emit) async {
       emit(AuthLoading());
       try {
@@ -20,33 +20,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         });
 
         if (response.statusCode == 200) {
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final responseData = jsonDecode(response.body);
           final token = responseData['token'];
-          final user = responseData['user'];
+          final userData = responseData['user'];
+          final user = UserModel.fromJson(userData);
 
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('userId', user['id'].toString());
-          await prefs.setString('nama', user['nama']);
-          await prefs.setString('email', user['email']);
-          await prefs.setString('role', user['role']);
-          await prefs.setString('kontak_darurat', user['kontak_darurat'] ?? '');
-          await prefs.setString('alamat', user['alamat'] ?? '');
-          await prefs.setString('tanggal_lahir', user['tanggal_lahir'] ?? '');
+          await prefs.setString('userId', user.id.toString());
+          await prefs.setString('nama', user.nama);
+          await prefs.setString('email', user.email);
+          await prefs.setString('role', user.role);
+          await prefs.setString('kontak_darurat', user.kontakDarurat ?? '');
+          await prefs.setString('alamat', user.alamat ?? '');
+          await prefs.setString('tanggal_lahir', user.tanggalLahir ?? '');
 
           final storage = FlutterSecureStorage();
           await storage.write(key: 'token', value: token);
 
-          if (user['role'] == 'admin') {
-            emit(AuthAdmin(nama: user['nama'], email: user['email']));
-          } else if (user['kontak_darurat'] == null ||
-              user['kontak_darurat'].isEmpty ||
-              user['alamat'] == null ||
-              user['alamat'].isEmpty ||
-              user['tanggal_lahir'] == null ||
-              user['tanggal_lahir'].isEmpty) {
+          if (user.role == 'admin') {
+            emit(AuthAdmin(user: user));
+          } else if (user.kontakDarurat == null ||
+              user.kontakDarurat!.isEmpty ||
+              user.alamat == null ||
+              user.alamat!.isEmpty ||
+              user.tanggalLahir == null ||
+              user.tanggalLahir!.isEmpty) {
             emit(AuthNeedsCompletion());
           } else {
-            emit(AuthAuthenticated(nama: user['nama'], email: user['email']));
+            emit(AuthAuthenticated(user: user));
           }
         } else {
           String message = 'Login gagal!';
@@ -61,22 +62,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
-    // Handler setelah profil dilengkapi
     on<AuthProfileCompleted>((event, emit) async {
       final prefs = await SharedPreferences.getInstance();
 
-      // Update SharedPreferences
       await prefs.setString('nama', event.nama);
       await prefs.setString('email', event.email);
       await prefs.setString('kontak_darurat', event.kontakDarurat);
       await prefs.setString('alamat', event.alamat);
       await prefs.setString('tanggal_lahir', event.tanggalLahir);
 
-      // Emit state terbaru
-      emit(AuthAuthenticated(nama: event.nama, email: event.email));
+      final user = UserModel(
+        id: int.parse(prefs.getString('userId') ?? '0'),
+        nama: event.nama,
+        email: event.email,
+        role: prefs.getString('role') ?? 'user',
+        kontakDarurat: event.kontakDarurat,
+        alamat: event.alamat,
+        tanggalLahir: event.tanggalLahir,
+      );
+
+      emit(AuthAuthenticated(user: user));
     });
 
-    // Logout Handler
     on<AuthLogoutRequested>((event, emit) async {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();

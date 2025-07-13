@@ -31,6 +31,7 @@ class BottomNavBar extends StatelessWidget {
           activeIcon: Icon(Icons.report),
           label: 'Laporan',
         ),
+        
         BottomNavigationBarItem(
           icon: Container(
             padding: EdgeInsets.all(8),
@@ -42,6 +43,12 @@ class BottomNavBar extends StatelessWidget {
           ),
           label: 'SOS',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.report_outlined),
+          activeIcon: Icon(Icons.report),
+          label: 'Riwayat Lapor',
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
       ],
     );
   }
